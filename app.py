@@ -10,24 +10,28 @@ jwt = JWTManager()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-
+    
     db.init_app(app)
     jwt.init_app(app)
     CORS(app)
-
+    
     with app.app_context():
         import models
         db.create_all()
         seed_stages()
-
+    
     import auth
     app.register_blueprint(auth.auth_bp, url_prefix='/api/auth')
-
+    
     import routes
     app.register_blueprint(routes.api_bp, url_prefix='/api')
-
+    
+    # Add a test route
+    @app.route('/')
+    def home():
+        return "Volantis API is running!"
+    
     return app
-
 
 def seed_stages():
     from models import Stage
@@ -43,4 +47,3 @@ def seed_stages():
         for i, name in enumerate(stages, 1):
             db.session.add(Stage(name=name, sequence_number=i))
         db.session.commit()
-        print("✅ 16 stages seeded!")
